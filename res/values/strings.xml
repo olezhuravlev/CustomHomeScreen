@@ -1,33 +1,27 @@
-<!--
-  Copyright 2013 The Android Open Source Project
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-  -->
-
 <resources>
-    <string name="app_name">Пример навигационного окна</string>
-    <string-array name="planets_array">
-        <item>Mercury</item>
-        <item>Venus</item>
-        <item>Earth</item>
-        <item>Mars</item>
-        <item>Jupiter</item>
-        <item>Saturn</item>
-        <item>Uranus</item>
-        <item>Neptune</item>
+
+    <string name="app_name">Custom home screen</string>
+
+    <string-array name="left_items_array">
+        <item>Настройки</item>
     </string-array>
+    <string-array name="left_items_array_about">
+        <item>Назад</item>
+    </string-array>
+
     <string name="drawer_open">Открыть навигацию</string>
     <string name="drawer_close">Закрыть навигацию</string>
-    <string name="action_websearch">Веб поиск</string>
-    <string name="app_not_available">Браузер недоступен</string>
+    <string name="action_about">Об авторе</string>
+    <string name="email1"><u>olezhuravlev</u></string>
+    <string name="email2"><u>@</u></string>
+    <string name="email3"><u>gmail.com</u></string>
+    <string name="email"><u>olezhuravlev@gmail.com</u></string>
+    <string name="hello">Hello!</string>
+    <string name="apps">Выберите приложения</string>
+    <string name="emptyList">Нет приложений</string>
+    <string name="ok">OK</string>
+    <string name="appsSelected">Выбрано:</string>
+
+    <color name="emailColor">#0F0</color>
+
 </resources>

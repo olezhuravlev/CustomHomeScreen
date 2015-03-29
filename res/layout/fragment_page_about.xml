@@ -1,0 +1,37 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/aboutLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#AA000000"
+    android:columnCount="1"
+    android:gravity="center"
+    android:padding="32dp" >
+
+    <TextView
+        android:id="@+id/tvEmail1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:text="@string/email1"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/emailColor" />
+
+    <TextView
+        android:id="@+id/tvEmail2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:text="@string/email2"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/emailColor" />
+
+    <TextView
+        android:id="@+id/tvEmail3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:text="@string/email3"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/emailColor" />
+
+</LinearLayout>
