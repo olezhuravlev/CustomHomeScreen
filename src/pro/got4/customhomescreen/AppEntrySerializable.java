@@ -31,14 +31,29 @@ public class AppEntrySerializable implements Serializable {
 
 	}
 
+	/**
+	 * Returns package's label.
+	 * 
+	 * @return
+	 */
 	public String getLabel() {
 		return mLabel;
 	}
 
+	/**
+	 * Returns package's name.
+	 * 
+	 * @return
+	 */
 	public String getPackageName() {
 		return mPackageName;
 	}
 
+	/**
+	 * Returns package's icon.
+	 * 
+	 * @return
+	 */
 	public Drawable getIcon() {
 
 		ByteArrayInputStream is = new ByteArrayInputStream(mIcon);

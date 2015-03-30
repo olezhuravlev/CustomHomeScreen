@@ -40,21 +40,27 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+/**
+ * Activity allows to select packages and returns the array of serializable
+ * container classes.
+ *
+ */
 public class AppsListActivity extends Activity implements
 		LoaderManager.LoaderCallbacks<List<AppEntry>>, OnMenuItemClickListener {
 
+	// Key for passing array of packages through intent's extras.
 	public static final String SELECTED_PACKAGES_KEY = "pro.got4.customhomescreen.selected_packages";
-
-	public static final int REQUEST_CODE = 100;
-
 	private final String CHECKED_KEY = "checked";
 
-	ListView lvMain;
+	// Some ids.
+	public static final int REQUEST_CODE = 100;
+
+	// ListView for showing installed packages.
+	private ListView mListView;
 
 	// This is the Adapter being used to display the list's data.
-	AppListAdapter mAdapter;
+	private AppListAdapter mAdapter;
 
-	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
@@ -68,8 +74,8 @@ public class AppsListActivity extends Activity implements
 		progressBar.setLayoutParams(lp);
 		progressBar.setIndeterminate(true);
 
-		lvMain = (ListView) findViewById(R.id.lvMain);
-		lvMain.setEmptyView(progressBar);
+		mListView = (ListView) findViewById(R.id.lvMain);
+		mListView.setEmptyView(progressBar);
 
 		// Must add the progress bar to the root of the layout
 		ViewGroup root = (ViewGroup) findViewById(android.R.id.content);
@@ -80,6 +86,7 @@ public class AppsListActivity extends Activity implements
 
 		if (savedInstanceState == null) {
 
+			// Restoring packages selection from string JSON description.
 			Bundle bundle = getIntent().getExtras();
 			String selectedPackages = bundle
 					.getString(MainActivity.SAVED_PACKAGES_KEY);
@@ -90,12 +97,14 @@ public class AppsListActivity extends Activity implements
 
 		} else {
 
+			// Restoring packages selection after reconfiguration from boolean
+			// array.
 			boolean[] checked = savedInstanceState.getBooleanArray(CHECKED_KEY);
 			mAdapter.setCheckedArray(checked);
 		}
 
-		lvMain.setAdapter(mAdapter);
-		lvMain.setOnItemClickListener(mAdapter);
+		mListView.setAdapter(mAdapter);
+		mListView.setOnItemClickListener(mAdapter);
 
 		// Prepare the loader. Either re-connect with an existing one,
 		// or start a new one.
@@ -119,6 +128,7 @@ public class AppsListActivity extends Activity implements
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 
+		// Let's show, how mane items selected.
 		MenuItem item = menu.findItem(0);
 
 		boolean listIsEmpty = mAdapter.isEmpty();
@@ -137,6 +147,7 @@ public class AppsListActivity extends Activity implements
 	@Override
 	public boolean onMenuItemClick(MenuItem item) {
 
+		// Return serialized array of selected packages with their icons.
 		Serializable[] checkedPackages = mAdapter.getCheckedPackagesArray();
 
 		Intent data = new Intent();
@@ -152,28 +163,41 @@ public class AppsListActivity extends Activity implements
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 
+		// Saving selected item's array for reconfiguration.
 		boolean[] checked = mAdapter.getCheckedArray();
 		outState.putBooleanArray(CHECKED_KEY, checked);
 
 		super.onSaveInstanceState(outState);
 	}
 
+	/**
+	 * Adapter that provides data for showing in ListView.
+	 *
+	 */
 	public class AppListAdapter extends ArrayAdapter<AppEntry> implements
 			OnItemClickListener {
 
+		// Array of checked items.
 		private boolean[] checked;
+
+		// JSON description of checked packages.
 		private String checkedPackages;
 
-		private final LayoutInflater mInflater;
+		private final LayoutInflater inflater;
 
 		public AppListAdapter(Context context) {
 
 			super(context, R.layout.apps_list_item);
 
-			mInflater = (LayoutInflater) context
+			inflater = (LayoutInflater) context
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		}
 
+		/**
+		 * Sets data for the adapter.
+		 * 
+		 * @param data
+		 */
 		public void setData(List<AppEntry> data) {
 
 			clear();
@@ -186,6 +210,7 @@ public class AppsListActivity extends Activity implements
 
 				addAll(data);
 
+				// If we don't have checked items array so it's created.
 				if (checkedPackages == null || checkedPackages.isEmpty()) {
 
 					if ((checked == null) || (checked.length != data.size()))
@@ -193,6 +218,8 @@ public class AppsListActivity extends Activity implements
 
 				} else {
 
+					// If we have string of JSON description of selected
+					// packages so we can recreate checked items array.
 					checked = new boolean[data.size()];
 
 					try {
@@ -229,6 +256,7 @@ public class AppsListActivity extends Activity implements
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
 
+			// Clicking any place on item results checking item.
 			checked[position] = !checked[position];
 			((CheckBox) view.findViewById(R.id.checkBox))
 					.setChecked(checked[position]);
@@ -236,17 +264,15 @@ public class AppsListActivity extends Activity implements
 			invalidateOptionsMenu();
 		}
 
-		/**
-		 * Populate new items in the list.
-		 */
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
+
+			// Populate new items in the list.
 
 			View view = null;
 
 			if (convertView == null) {
-				view = mInflater
-						.inflate(R.layout.apps_list_item, parent, false);
+				view = inflater.inflate(R.layout.apps_list_item, parent, false);
 			} else {
 				view = convertView;
 			}
@@ -262,19 +288,39 @@ public class AppsListActivity extends Activity implements
 			return view;
 		}
 
+		/**
+		 * Returns array of checked items positions.
+		 * 
+		 * @return
+		 */
 		public boolean[] getCheckedArray() {
 			return checked;
 		}
 
+		/**
+		 * Sets string JSON description of checked packages.
+		 * 
+		 * @param checkedPackages
+		 */
 		public void setCheckedPackages(String checkedPackages) {
 
 			this.checkedPackages = checkedPackages;
 		}
 
+		/**
+		 * Sets array of checked items position.
+		 * 
+		 * @param checked
+		 */
 		public void setCheckedArray(boolean[] checked) {
 			this.checked = checked;
 		}
 
+		/**
+		 * Return number of checked positions.
+		 * 
+		 * @return
+		 */
 		public int getCheckedCount() {
 
 			int cntr = 0;
@@ -287,6 +333,12 @@ public class AppsListActivity extends Activity implements
 			return cntr;
 		}
 
+		/**
+		 * Return array of serializable objects, keeping description of selected
+		 * packages.
+		 * 
+		 * @return
+		 */
 		public AppEntrySerializable[] getCheckedPackagesArray() {
 
 			int checkedCount = getCheckedCount();
@@ -309,11 +361,14 @@ public class AppsListActivity extends Activity implements
 		}
 	} // public class AppListAdapter
 
+	// Called after AsyncTaskLoader starts created.
 	@Override
 	public Loader<List<AppEntry>> onCreateLoader(int id, Bundle args) {
 		return new AppsListLoader(this);
 	}
 
+	// Called after AsyncTaskLoader finished its work (and after every
+	// reconfiguration that happens later).
 	@Override
 	public void onLoadFinished(Loader<List<AppEntry>> loader,
 			List<AppEntry> data) {
@@ -324,6 +379,7 @@ public class AppsListActivity extends Activity implements
 		invalidateOptionsMenu();
 	}
 
+	// Called in case AsyncTaskLoader was interrupted.
 	@Override
 	public void onLoaderReset(Loader<List<AppEntry>> loader) {
 		// Clear the data in the adapter.
@@ -331,7 +387,7 @@ public class AppsListActivity extends Activity implements
 	}
 
 	/**
-	 * Perform alphabetical comparison of application entry objects.
+	 * Comparator for alphabetical comparison of application entry objects.
 	 */
 	public static final Comparator<AppEntry> ALPHA_COMPARATOR = new Comparator<AppEntry>() {
 
@@ -343,97 +399,29 @@ public class AppsListActivity extends Activity implements
 		}
 	};
 
+	/**
+	 * Asynchronous loader for getting installed applications info from
+	 * PackageManager.
+	 * 
+	 * The feature is that some of functions called in UI thread, but
+	 * loadInBackground() performs in working thread.
+	 *
+	 */
 	public static class AppsListLoader extends AsyncTaskLoader<List<AppEntry>> {
 
 		final PackageManager mPackageManager;
 
-		List<AppEntry> mApps;
+		private List<AppEntry> mApps;
 
 		public AppsListLoader(Context context) {
 
 			super(context);
 
-			// Retrieve the package manager for later use; note we don't
-			// use 'context' directly but instead the save global application
-			// context returned by getContext().
+			// Retrieve the package manager for later use.
 			mPackageManager = getContext().getPackageManager();
 		}
 
-		/**
-		 * This is where the bulk of our work is done. This function is called
-		 * in a background thread and should generate a new set of data to be
-		 * published by the loader.
-		 */
-		@Override
-		public List<AppEntry> loadInBackground() {
-
-			// Retrieve all known applications.
-			List<ApplicationInfo> apps = mPackageManager
-					.getInstalledApplications(PackageManager.GET_META_DATA);
-
-			if (apps == null) {
-				apps = new ArrayList<ApplicationInfo>();
-			}
-
-			final Context context = getContext();
-
-			// Create corresponding array of entries and load their labels.
-			List<AppEntry> entries = new ArrayList<AppEntry>(apps.size());
-			for (int i = 0; i < apps.size(); i++) {
-
-				// if (i > 20)
-				// break;// TODO
-
-				ApplicationInfo appInfo = apps.get(i);
-				if (mPackageManager
-						.getLaunchIntentForPackage(appInfo.packageName) != null) {
-
-					AppEntry appEntry = new AppEntry(this, appInfo);
-					appEntry.loadLabel(context);
-
-					entries.add(appEntry);
-				}
-			}
-
-			// Sort the list.
-			Collections.sort(entries, ALPHA_COMPARATOR);
-
-			return entries;
-
-		}
-
-		/**
-		 * Called when there is new data to deliver to the client. The super
-		 * class will take care of delivering it; the implementation here just
-		 * adds a little more logic.
-		 */
-		@Override
-		public void deliverResult(List<AppEntry> apps) {
-
-			if (isReset()) {
-				// An async query came in while the loader is stopped. We
-				// don't need the result.
-				if (apps != null) {
-					onReleaseResources(apps);
-				}
-			}
-			List<AppEntry> oldApps = mApps;
-			mApps = apps;
-
-			if (isStarted()) {
-				// If the Loader is currently started, we can immediately
-				// deliver its results.
-				super.deliverResult(apps);
-			}
-
-			// At this point we can release the resources associated with
-			// 'oldApps' if needed; now that the new result is delivered we
-			// know that it is no longer in use.
-			if (oldApps != null) {
-				onReleaseResources(oldApps);
-			}
-		}
-
+		// Called just before the loading starts. Performs in UI thread.
 		@Override
 		protected void onStartLoading() {
 
@@ -455,9 +443,77 @@ public class AppsListActivity extends Activity implements
 
 		}
 
-		/**
-		 * Handles a request to stop the Loader.
-		 */
+		// This function is called in a background thread and should generate a
+		// new set of data to be published by the loader.
+		@Override
+		public List<AppEntry> loadInBackground() {
+
+			// Retrieve all known applications.
+			List<ApplicationInfo> apps = mPackageManager
+					.getInstalledApplications(PackageManager.GET_META_DATA);
+
+			if (apps == null) {
+				apps = new ArrayList<ApplicationInfo>();
+			}
+
+			final Context context = getContext();
+
+			// Create corresponding array of entries and load their labels.
+			List<AppEntry> entries = new ArrayList<AppEntry>(apps.size());
+			for (int i = 0; i < apps.size(); i++) {
+
+				// if (i > 20)
+				// break;// TODO
+
+				// Corresponds to information collected from the manifest.
+				ApplicationInfo appInfo = apps.get(i);
+				if (mPackageManager
+						.getLaunchIntentForPackage(appInfo.packageName) != null) {
+
+					AppEntry appEntry = new AppEntry(this, appInfo);
+					appEntry.loadLabel(context);
+
+					entries.add(appEntry);
+				}
+			}
+
+			// Sorting the list.
+			Collections.sort(entries, ALPHA_COMPARATOR);
+
+			return entries;
+
+		}
+
+		// Called when there is new data to deliver to the client. Performs in
+		// UI thread.
+		@Override
+		public void deliverResult(List<AppEntry> apps) {
+
+			if (isReset()) {
+				// An async query came in while the loader is stopped. We
+				// don't need the result.
+				if (apps != null) {
+					onReleaseResources(apps);
+				}
+			}
+			List<AppEntry> oldApps = mApps;
+			mApps = apps;
+
+			if (isStarted()) {
+				// If the Loader is currently started, we can immediately
+				// deliver its results.
+				super.deliverResult(apps);
+			}
+
+			// At this point we can release the resources associated with
+			// oldApps if needed; now that the new result is delivered we
+			// know that it is no longer in use.
+			if (oldApps != null) {
+				onReleaseResources(oldApps);
+			}
+		}
+
+		// Called when the loader stops. Performs in UI thread.
 		@Override
 		protected void onStopLoading() {
 
@@ -465,22 +521,18 @@ public class AppsListActivity extends Activity implements
 			cancelLoad();
 		}
 
-		/**
-		 * Handles a request to cancel a load.
-		 */
+		// Called when the loading cancelled. Performs in UI thread.
 		@Override
 		public void onCanceled(List<AppEntry> apps) {
 
 			super.onCanceled(apps);
 
-			// At this point we can release the resources associated with 'apps'
+			// At this point we can release the resources associated with apps
 			// if needed.
 			onReleaseResources(apps);
 		}
 
-		/**
-		 * Handles a request to completely reset the Loader.
-		 */
+		// Called when the loader completely reseted. Performs in UI thread.
 		@Override
 		protected void onReset() {
 
@@ -489,7 +541,7 @@ public class AppsListActivity extends Activity implements
 			// Ensure the loader is stopped
 			onStopLoading();
 
-			// At this point we can release the resources associated with 'apps'
+			// At this point we can release the resources associated with apps
 			// if needed.
 			if (mApps != null) {
 				onReleaseResources(mApps);
@@ -507,7 +559,8 @@ public class AppsListActivity extends Activity implements
 		}
 
 		/**
-		 * Container class for holding the per-item data in the Loader.
+		 * Container class for holding the per-item data in the Loader. Not
+		 * intended for serialization.
 		 */
 		static class AppEntry {
 
@@ -525,14 +578,17 @@ public class AppsListActivity extends Activity implements
 				mApkFile = new File(info.sourceDir);
 			}
 
+			// Return package's label.
 			public String getLabel() {
 				return mLabel;
 			}
 
+			// Return package's name.
 			public String getPackageName() {
 				return mPackageName;
 			}
 
+			// Return package's icon.
 			public Drawable getIcon() {
 
 				if (mIcon == null) {
@@ -560,14 +616,11 @@ public class AppsListActivity extends Activity implements
 						.getDrawable(android.R.drawable.sym_def_app_icon);
 			}
 
-			@Override
-			public String toString() {
-				return mLabel;
-			}
-
+			// Loads the current item's label and package name.
 			void loadLabel(Context context) {
 
 				if (mLabel == null || !mMounted) {
+
 					if (!mApkFile.exists()) {
 
 						mMounted = false;
@@ -585,6 +638,11 @@ public class AppsListActivity extends Activity implements
 						mPackageName = mAppInfo.packageName;
 					}
 				}
+			}
+
+			@Override
+			public String toString() {
+				return mLabel;
 			}
 		}
 	}

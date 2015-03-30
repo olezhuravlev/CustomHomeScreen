@@ -44,13 +44,15 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+// Starting class.
+//
 public class MainActivity extends Activity {
 
-	// public final static String SELECTED_PACKAGES_KEY = "selected_packages";
+	// Key for saving list of selected packages.
 	public final static String SAVED_PACKAGES_KEY = "saved_packages";
 
+	// Some ids.
 	private final static int BUTTON_ADD_ID = 20;
-
 	private final static int CONTENT_PAGE_ID = 100;
 	private final static int ABOUT_PAGE_ID = 200;
 
@@ -63,8 +65,10 @@ public class MainActivity extends Activity {
 	// Left menu's items titles array.
 	private String[] mLeftItemsTitles;
 
+	// Connector between drawer and and action bar.
 	private ActionBarDrawerToggle mDrawerToggle;
 
+	// Titles for drawer and the activity.
 	private CharSequence mDrawerTitle;
 	private CharSequence mTitle;
 
@@ -77,12 +81,15 @@ public class MainActivity extends Activity {
 		// Activity and drawer has the same title.
 		mTitle = mDrawerTitle = getTitle();
 
+		// Drawer menu's items.
 		mLeftItemsTitles = getResources().getStringArray(
 				R.array.left_items_array);
 
-		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-
+		// Drawer menu's listview.
 		mLeftDrawerList = (ListView) findViewById(R.id.left_drawer);
+
+		// Drawer's layout.
+		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
 		// Setting shadow on the edge of the drawer's panel.
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
@@ -93,7 +100,7 @@ public class MainActivity extends Activity {
 		ActionBar actionBar = getActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
 
-		// Enables open side menu (drawer) by pressing the button.
+		// Enables opening side menu (drawer) by pressing the button.
 		actionBar.setHomeButtonEnabled(true);
 
 		// ActionBarDrawerToggle performs connection between drawer and icon in
@@ -123,9 +130,15 @@ public class MainActivity extends Activity {
 		// Parental element listener.
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
 
+		// Trying to get saved packages list.
 		SharedPreferences sPref = getPreferences(MODE_PRIVATE);
 		String savedPackages = sPref.getString(SAVED_PACKAGES_KEY, "");
 
+		// If it's not the first start (e.g. reconfig), so nothing to do - all
+		// data consistency
+		// kept by the system.
+		// It it's the first start so we'll try to get saved packages list and
+		// get icon and title for every application identified by package.
 		if (savedInstanceState == null) {
 
 			Bundle bundle = new Bundle();
@@ -133,9 +146,12 @@ public class MainActivity extends Activity {
 
 				try {
 
+					// Info was saved with JSON format.
 					JSONArray packagesArr = new JSONArray(savedPackages);
 					int count = packagesArr.length();
 
+					// Serializable container will be send to PageFragment for
+					// displaying.
 					AppEntrySerializable[] arr = new AppEntrySerializable[count];
 					PackageManager packageManager = getPackageManager();
 
@@ -171,6 +187,9 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	/**
+	 * Saving data using SharedPreferences mechanism.
+	 */
 	private void saveData() {
 
 		FragmentManager fragmentManager = getFragmentManager();
@@ -189,6 +208,11 @@ public class MainActivity extends Activity {
 		editor.commit();
 	}
 
+	/**
+	 * Returns string description of selected packages in JSON format.
+	 * 
+	 * @return
+	 */
 	private String getSelectedPackages() {
 
 		FragmentManager fragmentManager = getFragmentManager();
@@ -203,7 +227,11 @@ public class MainActivity extends Activity {
 
 	@Override
 	public void onPause() {
+
 		super.onPause();
+
+		// That's the last callback the platform guarantees the application
+		// existing yet, so save data here.
 		saveData();
 	}
 
@@ -218,26 +246,15 @@ public class MainActivity extends Activity {
 		return super.onCreateOptionsMenu(menu);
 	}
 
+	// This callback triggered by system every time before menu displayed to
+	// user. Also it's called after invalidateOptionsMenu() summoned.
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 
+		// Creating menu's content depending on fragment selected.
 		FragmentManager fragmentManager = getFragmentManager();
 		Fragment fragmentAbout = fragmentManager.findFragmentByTag(String
 				.valueOf(ABOUT_PAGE_ID));
-
-		// int aboutId;
-		// if (existingAboutPage != null)
-		// aboutId = existingAboutPage.getId();
-		// existingAboutPage.getTag();
-		//
-		// int inStack = fragmentManager.getBackStackEntryCount();
-		// int inStackId;
-		// if (inStack > 0) {
-		// BackStackEntry backStackEntry = fragmentManager
-		// .getBackStackEntryAt(inStack - 1);
-		// inStackId = backStackEntry.getId();
-		// }
-		// existingAboutPage.getId()
 
 		if (fragmentAbout == null) {
 
@@ -306,7 +323,7 @@ public class MainActivity extends Activity {
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 
-		// Menu key opens the drawer.
+		// Menu key opens the drawer too.
 		if (event.getKeyCode() == KeyEvent.KEYCODE_MENU) {
 
 			boolean drawerOpen = mDrawerLayout.isDrawerOpen(mLeftDrawerList);
@@ -326,16 +343,20 @@ public class MainActivity extends Activity {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
+		// Return from previously started activity handling.
 		super.onActivityResult(requestCode, resultCode, data);
 
 		switch (requestCode) {
 
 		case AppsListActivity.REQUEST_CODE:
 
+			// User comes from selecting packages activity.
 			switch (resultCode) {
 
 			case RESULT_OK:
 
+				// Intent data keeps info about selected packages, including
+				// bitmap of icon.
 				Serializable checkedPackages = data
 						.getSerializableExtra(AppsListActivity.SELECTED_PACKAGES_KEY);
 
@@ -357,8 +378,6 @@ public class MainActivity extends Activity {
 
 	/**
 	 * The click listener for ListView in the navigation drawer.
-	 * 
-	 * @author programmer
 	 *
 	 */
 	private class DrawerItemClickListener implements
@@ -367,7 +386,8 @@ public class MainActivity extends Activity {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-			// We have the only button in the drawer, so just call page by id.
+			// We have the only button in the drawer, so just call page by id
+			// despite position parameter.
 			selectItem(BUTTON_ADD_ID, null);
 		}
 	}
@@ -388,6 +408,7 @@ public class MainActivity extends Activity {
 
 		case BUTTON_ADD_ID:
 
+			// Activity for selecting instantiated apps.
 			Intent intent = new Intent(this, AppsListActivity.class);
 			intent.putExtra(SAVED_PACKAGES_KEY, getSelectedPackages());
 			startActivityForResult(intent, AppsListActivity.REQUEST_CODE);
@@ -396,8 +417,7 @@ public class MainActivity extends Activity {
 
 		default:
 
-			// When we open fragment we just pass the item id down to the
-			// fragment.
+			// For opening certain fragment we just pass the id down to it.
 			fragment = new PageFragment();
 
 			if (bundle == null)
@@ -426,10 +446,8 @@ public class MainActivity extends Activity {
 		getActionBar().setTitle(mTitle);
 	}
 
-	/*
-	 * When using the ActionBarDrawerToggle, we must call it during
-	 * onPostCreate() and onConfigurationChanged()!
-	 */
+	// When using the ActionBarDrawerToggle, we must call it during
+	// onPostCreate() and onConfigurationChanged()!
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {
 
@@ -454,15 +472,19 @@ public class MainActivity extends Activity {
 	public static class PageFragment extends Fragment implements
 			OnClickListener {
 
+		// Key for passing ID parameter through intent's extras.
 		public static final String ITEM_ID = "item_id";
 
+		// ID of the current fragment.
 		private int itemId;
 
+		// Array of selected packages.
 		private Object[] checkedPackages;
 
 		// This is the Adapter being used to display the list's data.
 		private AppListAdapter mAdapter;
 
+		// Def. ctor.
 		public PageFragment() {
 		}
 
@@ -470,6 +492,7 @@ public class MainActivity extends Activity {
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
 
+			// Inflating certain view depending on got id.
 			View rootView = null;
 
 			itemId = getArguments().getInt(ITEM_ID);
@@ -497,6 +520,7 @@ public class MainActivity extends Activity {
 				tvEmail2.setOnClickListener(this);
 				tvEmail3.setOnClickListener(this);
 
+				// Animation just for fun.
 				Animation animation1 = AnimationUtils.loadAnimation(
 						getActivity(), R.anim.anim1);
 				Animation animation3 = AnimationUtils.loadAnimation(
@@ -508,8 +532,11 @@ public class MainActivity extends Activity {
 
 				break;
 
-			default:
+			default: // All other pages, but we have the only one, displays
+						// selected packages.
 
+				// After deserialization we have array of Object, but in truth
+				// there are AppEntrySerializable.
 				checkedPackages = (Object[]) getArguments().getSerializable(
 						AppsListActivity.SELECTED_PACKAGES_KEY);
 
@@ -522,6 +549,8 @@ public class MainActivity extends Activity {
 				// ListView's content adapter.
 				mAdapter = new AppListAdapter(getActivity());
 
+				// Converting array to list cause ArrayAdapter uses List<E> not
+				// arrays.
 				List<Object> listPackages;
 				if (checkedPackages == null)
 					listPackages = new Vector<Object>();
@@ -553,6 +582,7 @@ public class MainActivity extends Activity {
 		@Override
 		public void onClick(View v) {
 
+			// Start some activity that can handle email.
 			String email = (String) v.getTag();
 			String copy = "";
 			String subject = getString(R.string.hello);
@@ -579,6 +609,10 @@ public class MainActivity extends Activity {
 			return packages.toString();
 		}
 
+		/**
+		 * Adapter that provides data for showing in ListView.
+		 *
+		 */
 		private class AppListAdapter extends ArrayAdapter<Object> implements
 				OnItemClickListener {
 
@@ -592,6 +626,11 @@ public class MainActivity extends Activity {
 						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			}
 
+			/**
+			 * Sets data to the adapter.
+			 * 
+			 * @param data
+			 */
 			public void setData(List<Object> data) {
 
 				clear();
@@ -605,6 +644,8 @@ public class MainActivity extends Activity {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 
+				// When user taps on item in supported ListView, corresponding
+				// intent will be started.
 				AppEntrySerializable appDescription = (AppEntrySerializable) getItem(position);
 
 				String packageName = appDescription.getPackageName();
@@ -616,15 +657,12 @@ public class MainActivity extends Activity {
 
 				if (intent != null)
 					startActivity(intent);
-
-				// invalidateOptionsMenu();
 			}
 
-			/**
-			 * Populate new items in the list.
-			 */
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
+
+				// Populate new items in the list.
 
 				View view = null;
 
